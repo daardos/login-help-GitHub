@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub на пальцах | Интерактивный гайд</title>
+    <link href="https://googleapis.com" rel="stylesheet">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --card-bg: #161b22;
+            --border: #30363d;
+            --text-main: #e6edf3;
+            --text-dim: #8b949e;
+            --accent: #2f81f7;
+            --success: #238636;
+            --warning: #d29922;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg);
+            color: var(--text-main);
+            line-height: 1.6;
+        }
+
+        /* ПРОГРЕСС-БАР */
+        .progress-container {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 6px;
+            background: #21262d;
+            z-index: 1000;
+        }
+
+        .progress-bar {
+            height: 100%; width: 0%;
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            transition: width 0.4s ease;
+        }
+
+        header {
+            padding: 100px 20px 60px;
+            text-align: center;
+            background: radial-gradient(circle at top, #1e293b 0%, #0d1117 100%);
+        }
+
+        header h1 { font-size: 2.5rem; margin-bottom: 10px; letter-spacing: -1px; }
+
+        .container { max-width: 1100px; margin: 0 auto 100px; padding: 0 20px; }
+
+        .step-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            margin-bottom: 100px;
+            align-items: start;
+        }
+
+        .step-row:nth-child(even) { direction: rtl; }
+        .step-row:nth-child(even) .text-content, .step-row:nth-child(even) .visual-stack { direction: ltr; }
+
+        /* ЧЕК-ЛИСТ */
+        .checklist { list-style: none; margin: 20px 0; }
+        .check-item {
+            display: flex; align-items: flex-start;
+            margin-bottom: 15px; cursor: pointer;
+        }
+        .check-item input { position: absolute; opacity: 0; }
+        .checkmark {
+            height: 22px; width: 22px;
+            background: #21262d; border: 2px solid var(--border);
+            border-radius: 6px; margin-right: 12px; flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .check-item input:checked ~ .checkmark { background: var(--success); border-color: var(--success); }
+        .checkmark:after {
+            content: ""; display: none;
+            width: 5px; height: 10px;
+            border: solid white; border-width: 0 2.5px 2.5px 0;
+            transform: rotate(45deg);
+        }
+        .check-item input:checked ~ .checkmark:after { display: block; }
+        .check-item input:checked ~ .check-text { color: var(--text-dim); text-decoration: line-through; }
+
+        .advice-box {
+            background: rgba(255,255,255,0.03);
+            border-left: 4px solid var(--warning);
+            padding: 15px; border-radius: 4px; font-size: 0.9rem;
+        }
+
+        /* КАРТИНКИ */
+        .visual-stack { position: relative; height: 350px; cursor: pointer; }
+        .img-box {
+            position: absolute; width: 85%;
+            border-radius: 10px; border: 1px solid var(--border);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+            transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+            overflow: hidden;
+        }
+        .img-box img { width: 100%; display: block; opacity: 0.8; }
+        .img-back { z-index: 1; transform: translateX(-10%) scale(0.9); filter: brightness(0.4); }
+        .img-front { z-index: 2; transform: translateX(15%) translateY(10%) rotate(-3deg); }
+        .visual-stack:hover .img-back { z-index: 3; transform: translateX(10%) translateY(10%) rotate(-3deg); filter: brightness(1); }
+        .visual-stack:hover .img-front { z-index: 1; transform: translateX(-10%) scale(0.9); filter: brightness(0.3); }
+
+        /* МОДАЛКА */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none; align-items: center; justify-content: center;
+            z-index: 2000; backdrop-filter: blur(10px);
+        }
+        .modal-content {
+            background: var(--card-bg); padding: 40px; border-radius: 20px;
+            border: 1px solid var(--accent); text-align: center; max-width: 500px;
+        }
+        .close-btn {
+            background: var(--accent); color: white; padding: 10px 25px;
+            border: none; border-radius: 6px; font-weight: bold; cursor: pointer; margin-top: 20px;
+        }
+
+        @media (max-width: 850px) { .step-row { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+
+<div class="progress-container"><div class="progress-bar" id="pBar"></div></div>
+
+<header>
+    <h1>Сайт за 5 минут 🚀</h1>
+    <p>Гайд "на пальцах": от регистрации до первой ссылки в сети</p>
+</header>
+
+<div class="container">
+    
+    <!-- Шаг 1 -->
+    <div class="step-row">
+        <div class="text-content">
+            <h2>1. Регистрация</h2>
+            <p>GitHub — это "облако" для твоего кода. Без него сайт в интернет не выложить.</p>
+            <div class="checklist">
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Зайти на <strong>github.com</strong></span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Нажать <strong>Sign Up</strong> (тебя встретит анимированный терминал)</span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Ввести почту, пароль и логин</span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Подтвердить почту через письмо</span></label>
+            </div>
+            <div class="advice-box">💡 Почту лучше брать ту, которой пользуешься постоянно.</div>
+        </div>
+        <div class="visual-stack">
+            <div class="img-box" style="width: 100%; position: relative;"><img src="шаг1.png"></div>
+        </div>
+    </div>
+
+    <!-- Шаг 2 -->
+    <div class="step-row">
+        <div class="text-content">
+            <h2>2. Место для сайта</h2>
+            <p>Проекты на GitHub называются "репозиториями". Это как папка, но в сети.</p>
+            <div class="checklist">
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Нажать на плюс <strong>(+)</strong> в верхнем углу → <strong>New repository</strong></span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Дать имя (например, <i>my-first-site</i>)</span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Нажать <strong>Create repository</strong></span></label>
+            </div>
+            <div class="advice-box">💡 Ты можешь выбрать <strong>Private</strong> — сайт все равно будет работать, но код никто не увидит.</div>
+        </div>
+        <div class="visual-stack">
+            <div class="img-box img-back"><img src="шаг2-1.png"></div>
+            <div class="img-box img-front"><img src="шаг2-2.png"></div>
+        </div>
+    </div>
+
+    <!-- Шаг 3 -->
+    <div class="step-row">
+        <div class="text-content">
+            <h2>3. Загрузка файлов</h2>
+            <p>Теперь нужно перекинуть твой код с компа на GitHub.</p>
+            <div class="checklist">
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Нажать на ссылку <strong>uploading an existing file</strong></span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Перетащить свой <strong>index.html</strong> в окно</span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Внизу нажать зеленую кнопку <strong>Commit changes</strong></span></label>
+            </div>
+            <div class="advice-box">💡 Главный файл обязательно должен называться <strong>index.html</strong> (с маленькой буквы).</div>
+        </div>
+        <div class="visual-stack">
+            <div class="img-box img-back"><img src="шаг3-1.png"></div>
+            <div class="img-box img-front"><img src="шаг3-2.png"></div>
+        </div>
+    </div>
+
+    <!-- Шаг 4 -->
+    <div class="step-row">
+        <div class="text-content">
+            <h2>4. Запуск хостинга</h2>
+            <p>Делаем так, чтобы сайт открывался по ссылке, а не как файл.</p>
+            <div class="checklist">
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Зайти в <strong>Settings</strong> (Настройки) сверху</span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">Слева выбрать <strong>Pages</strong></span></label>
+                <label class="check-item"><input type="checkbox" class="step-check"><span class="checkmark"></span><span class="check-text">В пункте Branch выбрать <strong>main</strong> и нажать <strong>Save</strong></span></label>
+            </div>
+            <div class="advice-box">💡 Подожди 2-3 минуты. Ссылка "Your site is live..." появится вверху этой же страницы.</div>
+        </div>
+        <div class="visual-stack">
+            <div class="img-box img-back"><img src="шаг4-1.png"></div>
+            <div class="img-box img-front"><img src="шаг4-2.png"></div>
+        </div>
+    </div>
+
+</div>
+
+<div class="modal-overlay" id="modal">
+    <div class="modal-content">
+        <h3>🎉 Молодец!</h3>
+        <p>Ты зарегался, создал репозиторий и выложил свой сайт. Теперь ты официально веб-разработчик. Туда-сюда и ты уже профи! Делись ссылкой с друзьями.</p>
+        <button class="close-btn" onclick="closeModal()">Ура!</button>
+    </div>
+</div>
+
+<script>
+    const checks = document.querySelectorAll('.step-check');
+    const pBar = document.getElementById('pBar');
+    const modal = document.getElementById('modal');
+
+    checks.forEach(check => {
+        check.addEventListener('change', () => {
+            const checkedCount = document.querySelectorAll('.step-check:checked').length;
+            const progress = (checkedCount / checks.length) * 100;
+            pBar.style.width = progress + '%';
+
+            if (checkedCount === checks.length) {
+                setTimeout(() => { modal.style.display = 'flex'; }, 400);
+            }
+        });
+    });
+
+    function closeModal() { modal.style.display = 'none'; }
+</script>
+
+</body>
+</html>
